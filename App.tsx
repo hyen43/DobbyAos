@@ -1,141 +1,74 @@
-import React, {useState} from 'react';
-import {NavigationContainer, ParamListBase} from '@react-navigation/native';
-import {
-  createNativeStackNavigator,
-  NativeStackScreenProps,
-} from '@react-navigation/native-stack';
-import {
-  Dimensions,
-  Pressable,
-  StyleSheet,
-  Text,
-  TouchableHighlight,
-  View,
-} from 'react-native';
-import {useCallback} from 'react';
+import * as React from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import Daily from './src/pages/Daily';
+import Weekly from './src/pages/Weekly';
+import Register from './src/pages/Register';
+import Monthly from './src/pages/Monthly';
+import Settings from './src/pages/Settings';
+import {useState} from 'react';
+import SignIn from './src/pages/SignIn';
 
-type RootStackParamList = {
-  Home: undefined;
-  Details: undefined;
-};
-type HomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Home'>;
-type DetailsScreenProps = NativeStackScreenProps<ParamListBase, 'Details'>;
-
-function HomeScreen({navigation}: HomeScreenProps) {
-  const onClick = useCallback(() => {
-    navigation.navigate('Details');
-  }, [navigation]);
-
-  return (
-    <>
-      <View
-        style={{
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-          alignItems: 'flex-end',
-        }}>
-        <TouchableHighlight onPress={onClick}>
-          <Text>Home Screen</Text>
-        </TouchableHighlight>
-      </View>
-      <View
-        style={{
-          flex: 4,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: 'orange',
-        }}>
-        <Pressable onPress={onClick}>
-          <Text style={{color: 'white'}}>리나테스트</Text>
-        </Pressable>
-      </View>
-    </>
-  );
+// 말도 안되는 화면전환을 막기 위해 type선언
+export interface LoggedInParamList {
+  Daily: undefined; // 일간페이지
+  Weekly: undefined; // 주간페이지
+  Register: undefined; // 등록페이지
+  Monthly: undefined; // 월간페이지
+  Settings: undefined; //설정페이지
 }
 
-function DetailsScreen({navigation}: DetailsScreenProps) {
-  const onClick = useCallback(() => {
-    navigation.navigate('Home');
-  }, [navigation]);
-
-  return (
-    <View
-      style={{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}>
-      <TouchableHighlight onPress={onClick}>
-        <Text>Details Screen</Text>
-      </TouchableHighlight>
-    </View>
-  );
+export interface RootStackParamList {
+  SignIn: undefined; // signin에서 signup까지
 }
 
+const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator<RootStackParamList>();
+
 function App() {
-  const [showModal, setShowModal] = useState(true);
-  //RN navigation에서 safeAreaView를 넣어줌
-  //stack 겹겹이 쌓임
+  const [isLoggedIn, setLoggedIn] = useState(true);
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{title: '집안일 등록'}}
-        />
-        <Stack.Screen name="Details" component={DetailsScreen} />
-      </Stack.Navigator>
-      {showModal && (
-        <Pressable onPress={() => setShowModal(false)} style={styles.modal}>
-          <View style={styles.modalInner}>
-            <View style={{flex: 9}}>
-              <Text>Hello</Text>
-            </View>
-            <View style={styles.modalBtn}>
-              <Pressable>
-                <Text>저장</Text>
-              </Pressable>
-            </View>
-          </View>
-        </Pressable>
+      {isLoggedIn ? (
+        <Tab.Navigator>
+          <Tab.Screen
+            name="Daily"
+            component={Daily}
+            options={{title: '일간'}}
+          />
+          <Tab.Screen
+            name="Weekly"
+            component={Weekly}
+            options={{title: '주간'}}
+          />
+          <Tab.Screen
+            name="Register"
+            component={Register}
+            options={{headerShown: false}}
+          />
+          <Tab.Screen
+            name="Monthly"
+            component={Monthly}
+            options={{title: '월간'}}
+          />
+          <Tab.Screen
+            name="Settings"
+            component={Settings}
+            options={{title: '더보기'}}
+          />
+        </Tab.Navigator>
+      ) : (
+        <Stack.Navigator>
+          <Stack.Screen
+            name="SignIn"
+            component={SignIn}
+            options={{title: '로그인'}}
+          />
+        </Stack.Navigator>
       )}
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  modal: {
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'center',
-  },
-  modalInner: {
-    //웬만하면 absolute 없이 위치 조정으로 만들기
-    width: Dimensions.get('window').width - 100,
-    marginHorizontal: 50,
-    height: 300,
-    // position: 'absolute',
-    backgroundColor: 'orange',
-    // top: 50,
-    // bottom: 50,
-    // left: 50,
-    // right: 50,
-    borderRadius: 20,
-    padding: 20,
-    shadowRadius: 5,
-    shadowOffset: {width: 5, height: 5},
-    elevation: 15,
-  },
-  modalBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    bottom: 0,
-  },
-});
 
 export default App;
